@@ -29,6 +29,7 @@ class FloatingSupportButton extends StatefulWidget {
 class _FloatingSupportButtonState extends State<FloatingSupportButton> {
   // final GlobalKey<TooltipState> tooltipkey = GlobalKey<TooltipState>();
   final tooltipkey = GlobalKey<State<Tooltip>>();
+  bool isToolTipPaintVisible = true;
 
   @override
   void initState() {
@@ -39,24 +40,46 @@ class _FloatingSupportButtonState extends State<FloatingSupportButton> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Align(
-        alignment: Alignment.center,
-        child: Tooltip(
-          message: "Hello",
-          triggerMode: TooltipTriggerMode.manual,
-          key: tooltipkey,
-          preferBelow: false,
-          child: FloatingActionButton(
-            child: const Icon(Icons.add),
-            shape: const CircleBorder(
-              side: BorderSide(
-                color: Colors.white,
+      body: SafeArea(
+        child: Align(
+          alignment: Alignment.bottomRight,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Visibility(
+                  visible: isToolTipPaintVisible,
+                  child: CustomPaint(painter: Triangle(Colors.black))
               ),
-            ),
-            backgroundColor: const Color(0xFFc60c0c),
-            onPressed: () {
-              showAndCloseTooltip();
-            },
+              Padding(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: Tooltip(
+                  message: "Custom Tooltip by me Aditya Arora",
+                  triggerMode: TooltipTriggerMode.manual,
+                  key: tooltipkey,
+                  preferBelow: false,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(12),
+                    ),
+                    color: Color(0xff000000),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  margin: const EdgeInsets.only(right: 62, bottom: 6),
+                  child: FloatingActionButton(
+                    child: const Icon(Icons.abc),
+                    shape: const CircleBorder(
+                      side: BorderSide(
+                        color: Colors.white,
+                      ),
+                    ),
+                    onPressed: () {
+                      showAndCloseTooltip();
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -64,13 +87,39 @@ class _FloatingSupportButtonState extends State<FloatingSupportButton> {
   }
 
   Future showAndCloseTooltip() async {
-    await Future.delayed(const Duration(milliseconds: 10));
+    await Future.delayed(Duration(milliseconds: 10));
     // tooltipkey.currentState.ensureTooltipVisible();
     final dynamic tooltip = tooltipkey.currentState;
     tooltip?.ensureTooltipVisible();
-    await Future.delayed(const Duration(seconds: 4));
+    setState(() {
+      isToolTipPaintVisible = true;
+    });
+    await Future.delayed(Duration(seconds: 4));
     // tooltipkey.currentState.deactivate();
     tooltip?.deactivate();
+    setState(() {
+      isToolTipPaintVisible = false;
+    });
+
   }
 }
 
+class Triangle extends CustomPainter {
+  final Color backgroundColor;
+  Triangle(this.backgroundColor);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint()..color = backgroundColor;
+
+    var path = Path();
+    path.lineTo(-20, -2);
+    path.lineTo(-8, -22);
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
+  }
+}
